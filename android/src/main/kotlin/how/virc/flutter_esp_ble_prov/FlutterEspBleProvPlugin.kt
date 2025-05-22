@@ -303,7 +303,7 @@ class WifiProvisionManager(boss: Boss) : ActionManager(boss) {
     val passphrase = ctx.arg("passphrase") ?: return
     val deviceName = ctx.arg("deviceName") ?: return
     val proofOfPossession = ctx.arg("proofOfPossession") ?: return
-
+    // Extract the custom-data parameter
     val customData = ctx.call.argument<String>("custom-data") ?: ""
     val provToken = ctx.call.argument<String>("prov_token") ?: ""
     val thingId = ctx.call.argument<String>("thing_id") ?: ""
@@ -315,44 +315,42 @@ class WifiProvisionManager(boss: Boss) : ActionManager(boss) {
     boss.connect(conn, proofOfPossession) { esp ->
       boss.d("connection established")
 
-      // Prepare data to send in sequence
-      val dataList = listOfNotNull(
-        customData.takeIf { it.isNotEmpty() }?.let { "custom-data" to it },
-        provToken.takeIf { it.isNotEmpty() }?.let { "prov_token" to it },
-        thingId.takeIf { it.isNotEmpty() }?.let { "thing_id" to it },
-        claimCert.takeIf { it.isNotEmpty() }?.let { "claim_cert" to it },
-        claimKey.takeIf { it.isNotEmpty() }?.let { "claim_key" to it }
-      )
+      // Send custom data before starting WiFi provisioning
+      if (customData.isNotEmpty()) {
+        try {
+          boss.d("Sending custom data before provisioning: $customData")
 
-      fun sendNext(index: Int) {
-        if (index >= dataList.size) {
-          boss.d("All custom data sent. Starting provisioning.")
+          // Create a ResponseListener to handle the response
+          val responseListener = object : com.espressif.provisioning.listeners.ResponseListener {
+            override fun onSuccess(returnData: ByteArray?) {
+              val responseStr = returnData?.let { String(it) } ?: "null"
+              boss.d("Custom data response: $responseStr")
+
+              // Start WiFi provisioning after custom data is sent successfully
+              startWifiProvisioning(esp, ssid, passphrase, ctx)
+            }
+
+            override fun onFailure(e: java.lang.Exception) {
+              boss.e("Error receiving custom data response: $e")
+              // Start WiFi provisioning even if custom data fails
+              startWifiProvisioning(esp, ssid, passphrase, ctx)
+            }
+          }
+
+          // Call the method with all required parameters
+          esp.sendDataToCustomEndPoint("custom-data", customData.toByteArray(), responseListener)
+
+        } catch (e: Exception) {
+          boss.e("Error sending custom data: $e")
+          // Start WiFi provisioning even if custom data sending fails
           startWifiProvisioning(esp, ssid, passphrase, ctx)
-          return
         }
-
-        val (endpoint, value) = dataList[index]
-        boss.d("Sending [$endpoint]: $value")
-
-        esp.sendDataToCustomEndPoint(endpoint, value.toByteArray(), object : com.espressif.provisioning.listeners.ResponseListener {
-          override fun onSuccess(returnData: ByteArray?) {
-            val responseStr = returnData?.let { String(it) } ?: "null"
-            boss.d("[$endpoint] success: $responseStr")
-            sendNext(index + 1)
-          }
-
-          override fun onFailure(e: Exception) {
-            boss.e("[$endpoint] failed: $e")
-            // Continue to next even if this fails
-            sendNext(index + 1)
-          }
-        })
+      } else {
+        // No custom data to send, start WiFi provisioning directly
+        startWifiProvisioning(esp, ssid, passphrase, ctx)
       }
-
-      sendNext(0)
     }
   }
-
 
   // Helper method to start WiFi provisioning
   private fun startWifiProvisioning(esp: ESPDevice, ssid: String, passphrase: String, ctx: CallContext) {
