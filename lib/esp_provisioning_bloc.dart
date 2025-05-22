@@ -43,24 +43,32 @@ class EspProvisioningBloc
 
         final scannedDevices = await espProvisioningService
             .scanBleDevices(event.bluetoothDevicePrefix)
-            .timeout(const Duration(seconds: TIMEOUT),
-                onTimeout: () => List.empty());
+            .timeout(
+              const Duration(seconds: TIMEOUT),
+              onTimeout: () => List.empty(),
+            );
 
-        emit(state.copyWith(
-          status: EspProvisioningStatus.bleScanned,
-          bluetoothDevices: scannedDevices,
-        ));
+        emit(
+          state.copyWith(
+            status: EspProvisioningStatus.bleScanned,
+            bluetoothDevices: scannedDevices,
+          ),
+        );
       } else {
-        emit(state.copyWith(
-          status: EspProvisioningStatus.error,
-          errorMsg: 'Bluetooth permission not granted',
-        ));
+        emit(
+          state.copyWith(
+            status: EspProvisioningStatus.error,
+            errorMsg: 'Bluetooth permission not granted',
+          ),
+        );
       }
     } catch (e) {
-      emit(state.copyWith(
-        status: EspProvisioningStatus.error,
-        errorMsg: e.toString(),
-      ));
+      emit(
+        state.copyWith(
+          status: EspProvisioningStatus.error,
+          errorMsg: e.toString(),
+        ),
+      );
     }
   }
 
@@ -95,10 +103,13 @@ class EspProvisioningBloc
       var scannedNetworks = <String>[];
       scannedNetworks = await espProvisioningService
           .scanWifiNetworks(event.bluetoothDevice, event.proofOfPossession)
-          .timeout(const Duration(seconds: TIMEOUT), onTimeout: () {
-        timedOut = true;
-        return List.empty();
-      });
+          .timeout(
+            const Duration(seconds: TIMEOUT),
+            onTimeout: () {
+              timedOut = true;
+              return List.empty();
+            },
+          );
       emit(
         state.copyWith(
           status: EspProvisioningStatus.wifiScanned,
@@ -108,8 +119,12 @@ class EspProvisioningBloc
         ),
       );
     } catch (e) {
-      emit(state.copyWith(
-          status: EspProvisioningStatus.error, errorMsg: e.toString()));
+      emit(
+        state.copyWith(
+          status: EspProvisioningStatus.error,
+          errorMsg: e.toString(),
+        ),
+      );
     }
   }
 
@@ -133,21 +148,40 @@ class EspProvisioningBloc
           timedOut: timedOut,
         ),
       );
-      wifiProvisioned = (await espProvisioningService
-          .provisionWifi(event.bluetoothDevice, event.proofOfPossession,
-              event.wifiNetwork, event.password, event.custom_data)
-          .timeout(const Duration(seconds: TIMEOUT), onTimeout: () {
-        timedOut = true;
-        return false;
-      }))!;
-      emit(state.copyWith(
-        status: EspProvisioningStatus.wifiProvisioned,
-        wifiProvisioned: wifiProvisioned,
-        timedOut: timedOut,
-      ));
+      wifiProvisioned =
+          (await espProvisioningService
+              .provisionWifi(
+                event.bluetoothDevice,
+                event.proofOfPossession,
+                event.wifiNetwork,
+                event.password,
+                event.custom_data,
+                event.prov_token,
+                event.thing_id,
+                event.claim_cert,
+                event.claim_key,
+              )
+              .timeout(
+                const Duration(seconds: TIMEOUT),
+                onTimeout: () {
+                  timedOut = true;
+                  return false;
+                },
+              ))!;
+      emit(
+        state.copyWith(
+          status: EspProvisioningStatus.wifiProvisioned,
+          wifiProvisioned: wifiProvisioned,
+          timedOut: timedOut,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-          status: EspProvisioningStatus.error, errorMsg: e.toString()));
+      emit(
+        state.copyWith(
+          status: EspProvisioningStatus.error,
+          errorMsg: e.toString(),
+        ),
+      );
     }
   }
 
@@ -155,13 +189,14 @@ class EspProvisioningBloc
   /// using the permission_handler package
   Future<void> requestBluetoothPermission() async {
     if (Platform.isAndroid) {
-      Map<Permission, PermissionStatus> status = await [
-        Permission.bluetoothScan,
-        Permission.bluetoothConnect
-      ].request();
+      Map<Permission, PermissionStatus> status =
+          await [
+            Permission.bluetoothScan,
+            Permission.bluetoothConnect,
+          ].request();
       bluetoothIsGranted =
           status[Permission.bluetoothScan] == PermissionStatus.granted &&
-              status[Permission.bluetoothConnect] == PermissionStatus.granted;
+          status[Permission.bluetoothConnect] == PermissionStatus.granted;
     } else if (Platform.isIOS) {
       Map<Permission, PermissionStatus> status =
           await [Permission.bluetooth].request();

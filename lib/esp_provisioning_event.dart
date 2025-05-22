@@ -24,7 +24,9 @@ class EspProvisioningEventBleSelected extends EspProvisioningEvent {
   final String proofOfPossession;
 
   const EspProvisioningEventBleSelected(
-      this.bluetoothDevice, this.proofOfPossession);
+    this.bluetoothDevice,
+    this.proofOfPossession,
+  );
 
   @override
   List<Object> get props => [bluetoothDevice, proofOfPossession];
@@ -37,11 +39,33 @@ class EspProvisioningEventWifiSelected extends EspProvisioningEvent {
   final String wifiNetwork;
   final String password;
   final String custom_data;
+  final String prov_token;
+  final String thing_id;
+  final String claim_cert;
+  final String claim_key;
 
-  const EspProvisioningEventWifiSelected(this.bluetoothDevice,
-      this.proofOfPossession, this.wifiNetwork, this.password, this.custom_data);
+  const EspProvisioningEventWifiSelected(
+    this.bluetoothDevice,
+    this.proofOfPossession,
+    this.wifiNetwork,
+    this.password,
+    this.custom_data,
+    this.prov_token,
+    this.thing_id,
+    this.claim_cert,
+    this.claim_key,
+  );
 
   @override
-  List<Object> get props =>
-      [bluetoothDevice, proofOfPossession, wifiNetwork, password, custom_data];
+  List<Object> get props => [
+    bluetoothDevice,
+    proofOfPossession,
+    wifiNetwork,
+    password,
+    custom_data,
+    prov_token,
+    thing_id,
+    claim_cert,
+    claim_key,
+  ];
 }

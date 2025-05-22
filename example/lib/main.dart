@@ -2,7 +2,6 @@ import 'package:esp_provisioning_wifi/esp_provisioning_bloc.dart';
 import 'package:esp_provisioning_wifi/esp_provisioning_event.dart';
 import 'package:esp_provisioning_wifi/esp_provisioning_state.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() {
@@ -174,12 +173,19 @@ class _MyAppViewState extends State<MyAppView> {
                           ),
                           onTap: () async {
                             final wifiNetwork = state.wifiNetworks[i];
-                            context.read<EspProvisioningBloc>().add(
-                                EspProvisioningEventWifiSelected(
-                                    state.bluetoothDevice,
-                                    proofOfPossessionController.text,
-                                    wifiNetwork,
-                                    passphraseController.text,"tester1"));
+                            context
+                                .read<EspProvisioningBloc>()
+                                .add(EspProvisioningEventWifiSelected(
+                                  state.bluetoothDevice,
+                                  proofOfPossessionController.text,
+                                  wifiNetwork,
+                                  passphraseController.text,
+                                  "tester1",
+                                  "tester2",
+                                  "tester3",
+                                  "tester4",
+                                  "tester5",
+                                ));
                             pushFeedback(
                                 'Provisioning WiFi $wifiNetwork on ${state.bluetoothDevice}');
                           },

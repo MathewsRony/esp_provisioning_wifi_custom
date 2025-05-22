@@ -11,16 +11,19 @@ class MethodChannelFlutterEspBleProv extends FlutterEspBleProvPlatform {
 
   @override
   Future<String?> getPlatformVersion() async {
-    final version =
-        await methodChannel.invokeMethod<String>('getPlatformVersion');
+    final version = await methodChannel.invokeMethod<String>(
+      'getPlatformVersion',
+    );
     return version;
   }
 
   @override
   Future<List<String>> scanBleDevices(String prefix) async {
     final args = {'prefix': prefix};
-    final raw =
-        await methodChannel.invokeMethod<List<Object?>>('scanBleDevices', args);
+    final raw = await methodChannel.invokeMethod<List<Object?>>(
+      'scanBleDevices',
+      args,
+    );
     final List<String> devices = [];
     if (raw != null) {
       devices.addAll(raw.cast<String>());
@@ -30,13 +33,17 @@ class MethodChannelFlutterEspBleProv extends FlutterEspBleProvPlatform {
 
   @override
   Future<List<String>> scanWifiNetworks(
-      String deviceName, String proofOfPossession) async {
+    String deviceName,
+    String proofOfPossession,
+  ) async {
     final args = {
       'deviceName': deviceName,
       'proofOfPossession': proofOfPossession,
     };
     final raw = await methodChannel.invokeMethod<List<Object?>>(
-        'scanWifiNetworks', args);
+      'scanWifiNetworks',
+      args,
+    );
     final List<String> networks = [];
     if (raw != null) {
       networks.addAll(raw.cast<String>());
@@ -45,14 +52,27 @@ class MethodChannelFlutterEspBleProv extends FlutterEspBleProvPlatform {
   }
 
   @override
-  Future<bool?> provisionWifi(String deviceName, String proofOfPossession,
-      String ssid, String passphrase, String custom_data) async {
+  Future<bool?> provisionWifi(
+    String deviceName,
+    String proofOfPossession,
+    String ssid,
+    String passphrase,
+    String custom_data,
+    String prov_token,
+    String thing_id,
+    String claim_cert,
+    String claim_key,
+  ) async {
     final args = {
       'deviceName': deviceName,
       'proofOfPossession': proofOfPossession,
       'ssid': ssid,
       'passphrase': passphrase,
-      'custom-data': custom_data
+      'custom-data': custom_data,
+      'prov_token-data': prov_token,
+      'thing_id': thing_id,
+      'claim_cert': claim_cert,
+      'claim_key': claim_key,
     };
     return await methodChannel.invokeMethod<bool?>('provisionWifi', args);
   }
