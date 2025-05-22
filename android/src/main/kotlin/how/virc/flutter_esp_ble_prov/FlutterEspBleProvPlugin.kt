@@ -305,6 +305,10 @@ class WifiProvisionManager(boss: Boss) : ActionManager(boss) {
     val proofOfPossession = ctx.arg("proofOfPossession") ?: return
     // Extract the custom-data parameter
     val customData = ctx.call.argument<String>("custom-data") ?: ""
+    val provToken = ctx.call.argument<String>("prov_token") ?: ""
+    val thingId = ctx.call.argument<String>("thing_id") ?: ""
+    val claimCert = ctx.call.argument<String>("claim_cert") ?: ""
+    val claimKey = ctx.call.argument<String>("claim_key") ?: ""
 
     val conn = boss.connector(deviceName) ?: return
 
