@@ -155,7 +155,6 @@ class EspProvisioningBloc
                 event.proofOfPossession,
                 event.wifiNetwork,
                 event.password,
-                event.custom_data,
                 event.prov_token,
                 event.thing_id,
                 event.claim_cert,

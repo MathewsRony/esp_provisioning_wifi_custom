@@ -43,7 +43,6 @@ abstract class FlutterEspBleProvPlatform extends PlatformInterface {
     String proofOfPossession,
     String ssid,
     String passphrase,
-    String custom_data,
     String prov_token,
     String thing_id,
     String claim_cert,
