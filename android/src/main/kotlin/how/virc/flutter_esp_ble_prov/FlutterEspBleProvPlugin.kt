@@ -341,6 +341,37 @@ class WifiProvisionManager(boss: Boss) : ActionManager(boss) {
                 claimKey.takeIf { it.isNotEmpty() }?.let { "claim_key" to it }
             )
 
+            fun sendInChunks(
+                device: ESPDevice,
+                endpoint: String,
+                data: ByteArray,
+                mtu: Int = 180,
+                onComplete: () -> Unit,
+                onError: (Exception) -> Unit
+            ) {
+                val chunks = data.toList().chunked(mtu).map { it.toByteArray() }
+
+                fun sendChunk(index: Int) {
+                    if (index >= chunks.size) {
+                        onComplete()
+                        return
+                    }
+
+                    device.sendDataToCustomEndPoint(endpoint, chunks[index], object : com.espressif.provisioning.listeners.ResponseListener {
+                        override fun onSuccess(returnData: ByteArray?) {
+                            boss.d("[$endpoint] chunk $index success")
+                            sendChunk(index + 1)
+                        }
+
+                        override fun onFailure(e: Exception) {
+                            boss.e("[$endpoint] chunk $index failed: $e")
+                            onError(e)
+                        }
+                    })
+                }
+
+                sendChunk(0)
+            }
 
             fun sendNext(index: Int) {
                 if (index >= dataList.size) {
@@ -350,22 +381,21 @@ class WifiProvisionManager(boss: Boss) : ActionManager(boss) {
                 }
 
                 val (endpoint, value) = dataList[index]
-                boss.d("Sending [$endpoint]: $value")
+                boss.d("Sending [$endpoint]")
 
-                esp.sendDataToCustomEndPoint(
-                    endpoint,
-                    value.toByteArray(),
-                    object : com.espressif.provisioning.listeners.ResponseListener {
-                        override fun onSuccess(returnData: ByteArray?) {
-                            boss.d("[$endpoint] success: ${returnData?.let { String(it) } ?: "null"}")
-                            sendNext(index + 1)
-                        }
-
-                        override fun onFailure(e: Exception) {
-                            boss.e("[$endpoint] failed: $e")
-                            sendNext(index + 1) // continue anyway
-                        }
-                    })
+                sendInChunks(
+                    device = esp,
+                    endpoint = endpoint,
+                    data = value.toByteArray(),
+                    onComplete = {
+                        boss.d("[$endpoint] full payload sent")
+                        sendNext(index + 1)
+                    },
+                    onError = { e ->
+                        boss.e("[$endpoint] failed: ${e.message}")
+                        sendNext(index + 1) // continue even on failure
+                    }
+                )
             }
 
             sendNext(0)
