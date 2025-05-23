@@ -31,7 +31,6 @@ public class SwiftFlutterEspBleProvPlugin: NSObject, FlutterPlugin {
             let ssid = arguments["ssid"] as! String
             let passphrase = arguments["passphrase"] as! String
             // Extract the custom data
-            let customData = arguments["custom-data"] as? String ?? ""
             let provToken = arguments["prov_token"] as? String ?? ""
             let thingId = arguments["thing_id"] as? String ?? ""
             let claimCert = arguments["claim_cert"] as? String ?? ""
@@ -41,11 +40,10 @@ public class SwiftFlutterEspBleProvPlugin: NSObject, FlutterPlugin {
                 proofOfPossession: proofOfPossession,
                 ssid: ssid,
                 passphrase: passphrase,
-                customData: customData
-                provToken: provToken
-                thingId: thingId
-                claimCert: claimCert
-                claimKey: claimKey
+                provToken: provToken,
+                thingId: thingId,
+                claimCert: claimCert,
+                claimKey: claimKey,
             )
         } else {
             result("iOS " + UIDevice.current.systemVersion)
@@ -58,7 +56,7 @@ protocol ProvisionService {
     var result: FlutterResult { get }
     func searchDevices(prefix: String) -> Void
     func scanWifiNetworks(deviceName: String, proofOfPossession: String) -> Void
-    func provision(deviceName: String, proofOfPossession: String, ssid: String, passphrase: String, customData: String, provToken: String, thingId: String, claimCert: String, claimKey: String) -> Void
+    func provision(deviceName: String, proofOfPossession: String, ssid: String, passphrase: String, provToken: String, thingId: String, claimCert: String, claimKey: String) -> Void
 }
 
 private class BLEProvisionService: ProvisionService {
@@ -93,10 +91,9 @@ private class BLEProvisionService: ProvisionService {
         }
     }
 
-   func provision(deviceName: String, proofOfPossession: String, ssid: String, passphrase: String, customData: String = "", provToken: String = "", thingId: String = "", claimCert: String = "", claimKey: String = "") {
+   func provision(deviceName: String, proofOfPossession: String, ssid: String, passphrase: String, provToken: String = "", thingId: String = "", claimCert: String = "", claimKey: String = "") {
        self.connect(deviceName: deviceName, proofOfPossession: proofOfPossession) { device in
            let payloads: [(endpoint: String, value: String)] = [
-               ("custom-data", customData),
                ("prov_token", provToken),
                ("thing_id", thingId),
                ("claim_cert", claimCert),

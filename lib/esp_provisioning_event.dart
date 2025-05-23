@@ -38,7 +38,6 @@ class EspProvisioningEventWifiSelected extends EspProvisioningEvent {
   final String proofOfPossession;
   final String wifiNetwork;
   final String password;
-  final String custom_data;
   final String prov_token;
   final String thing_id;
   final String claim_cert;
@@ -49,7 +48,6 @@ class EspProvisioningEventWifiSelected extends EspProvisioningEvent {
     this.proofOfPossession,
     this.wifiNetwork,
     this.password,
-    this.custom_data,
     this.prov_token,
     this.thing_id,
     this.claim_cert,
@@ -62,7 +60,6 @@ class EspProvisioningEventWifiSelected extends EspProvisioningEvent {
     proofOfPossession,
     wifiNetwork,
     password,
-    custom_data,
     prov_token,
     thing_id,
     claim_cert,

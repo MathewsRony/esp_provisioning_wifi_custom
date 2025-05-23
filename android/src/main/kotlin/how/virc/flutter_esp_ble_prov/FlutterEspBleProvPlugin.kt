@@ -321,8 +321,6 @@ class WifiProvisionManager(boss: Boss) : ActionManager(boss) {
         val passphrase = ctx.arg("passphrase") ?: return
         val deviceName = ctx.arg("deviceName") ?: return
         val proofOfPossession = ctx.arg("proofOfPossession") ?: return
-
-        val customData = ctx.call.argument<String>("custom-data") ?: ""
         val provToken = ctx.call.argument<String>("prov_token") ?: ""
         val thingId = ctx.call.argument<String>("thing_id") ?: ""
         val claimCert = ctx.call.argument<String>("claim_cert") ?: ""
@@ -334,7 +332,6 @@ class WifiProvisionManager(boss: Boss) : ActionManager(boss) {
             boss.d("connection established")
 
             val dataList = listOfNotNull(
-                customData.takeIf { it.isNotEmpty() }?.let { "custom-data" to it },
                 provToken.takeIf { it.isNotEmpty() }?.let { "prov_token" to it },
                 thingId.takeIf { it.isNotEmpty() }?.let { "thing_id" to it },
                 claimCert.takeIf { it.isNotEmpty() }?.let { "claim_cert" to it },

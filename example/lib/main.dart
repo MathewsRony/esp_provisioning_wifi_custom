@@ -184,7 +184,6 @@ class _MyAppViewState extends State<MyAppView> {
                                   "tester2",
                                   "tester3",
                                   "tester4",
-                                  "tester5",
                                 ));
                             pushFeedback(
                                 'Provisioning WiFi $wifiNetwork on ${state.bluetoothDevice}');
