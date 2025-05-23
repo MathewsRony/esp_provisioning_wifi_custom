@@ -69,7 +69,7 @@ class MethodChannelFlutterEspBleProv extends FlutterEspBleProvPlatform {
       'ssid': ssid,
       'passphrase': passphrase,
       'custom-data': custom_data,
-      'prov_token-data': prov_token,
+      'prov_token': prov_token,
       'thing_id': thing_id,
       'claim_cert': claim_cert,
       'claim_key': claim_key,
