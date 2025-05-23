@@ -379,6 +379,8 @@ class WifiProvisionManager(boss: Boss) : ActionManager(boss) {
 
                 val (endpoint, value) = dataList[index]
                 boss.d("Sending [$endpoint]")
+                boss.d("Data: [$value]")
+                boss.d("Data to ByteArray: [${value.toByteArray()}]")
 
                 sendInChunks(
                     device = esp,
