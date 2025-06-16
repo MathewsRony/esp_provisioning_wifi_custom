@@ -180,10 +180,11 @@ class _MyAppViewState extends State<MyAppView> {
                                   proofOfPossessionController.text,
                                   wifiNetwork,
                                   passphraseController.text,
-                                  "tester1",
-                                  "tester2",
-                                  "tester3",
-                                  "tester4",
+                                  "prov_token",
+                                  "thing_id",
+                                  "claim_cert",
+                                  "claim_key",
+                                  "root_ca",
                                 ));
                             pushFeedback(
                                 'Provisioning WiFi $wifiNetwork on ${state.bluetoothDevice}');

@@ -36,6 +36,7 @@ class FlutterEspBleProv {
     String thing_id,
     String claim_cert,
     String claim_key,
+    String root_ca,
   ) {
     return FlutterEspBleProvPlatform.instance.provisionWifi(
       deviceName,
@@ -46,6 +47,7 @@ class FlutterEspBleProv {
       thing_id,
       claim_cert,
       claim_key,
+      root_ca,
     );
   }
 

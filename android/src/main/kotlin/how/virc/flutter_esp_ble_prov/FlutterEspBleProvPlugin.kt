@@ -325,6 +325,7 @@ class WifiProvisionManager(boss: Boss) : ActionManager(boss) {
         val thingId = ctx.call.argument<String>("thing_id") ?: ""
         val claimCert = ctx.call.argument<String>("claim_cert") ?: ""
         val claimKey = ctx.call.argument<String>("claim_key") ?: ""
+        val rootCa = ctx.call.argument<String>("root_ca") ?: ""
 
         val conn = boss.connector(deviceName) ?: return
 
@@ -335,7 +336,8 @@ class WifiProvisionManager(boss: Boss) : ActionManager(boss) {
                 provToken.takeIf { it.isNotEmpty() }?.let { "prov_token" to it },
                 thingId.takeIf { it.isNotEmpty() }?.let { "thing_id" to it },
                 claimCert.takeIf { it.isNotEmpty() }?.let { "claim_cert" to it },
-                claimKey.takeIf { it.isNotEmpty() }?.let { "claim_key" to it }
+                claimKey.takeIf { it.isNotEmpty() }?.let { "claim_key" to it },
+                rootCa.takeIf { it.isNotEmpty() }?.let { "root_ca" to it }
             )
 
             fun sendInChunks(
@@ -354,17 +356,20 @@ class WifiProvisionManager(boss: Boss) : ActionManager(boss) {
                         return
                     }
 
-                    device.sendDataToCustomEndPoint(endpoint, chunks[index], object : com.espressif.provisioning.listeners.ResponseListener {
-                        override fun onSuccess(returnData: ByteArray?) {
-                            boss.d("[$endpoint] chunk $index success")
-                            sendChunk(index + 1)
-                        }
+                    device.sendDataToCustomEndPoint(
+                        endpoint,
+                        chunks[index],
+                        object : com.espressif.provisioning.listeners.ResponseListener {
+                            override fun onSuccess(returnData: ByteArray?) {
+                                boss.d("[$endpoint] chunk $index success")
+                                sendChunk(index + 1)
+                            }
 
-                        override fun onFailure(e: Exception) {
-                            boss.e("[$endpoint] chunk $index failed: $e")
-                            onError(e)
-                        }
-                    })
+                            override fun onFailure(e: Exception) {
+                                boss.e("[$endpoint] chunk $index failed: $e")
+                                onError(e)
+                            }
+                        })
                 }
 
                 sendChunk(0)

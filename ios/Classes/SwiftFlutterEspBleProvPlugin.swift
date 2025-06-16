@@ -35,6 +35,7 @@ public class SwiftFlutterEspBleProvPlugin: NSObject, FlutterPlugin {
             let thingId = arguments["thing_id"] as? String ?? ""
             let claimCert = arguments["claim_cert"] as? String ?? ""
             let claimKey = arguments["claim_key"] as? String ?? ""
+            let rootCa = arguments["root_ca"] as? String ?? ""
             provisionService.provision(
                 deviceName: deviceName,
                 proofOfPossession: proofOfPossession,
@@ -44,6 +45,7 @@ public class SwiftFlutterEspBleProvPlugin: NSObject, FlutterPlugin {
                 thingId: thingId,
                 claimCert: claimCert,
                 claimKey: claimKey,
+                rootCa: rootCa,
             )
         } else {
             result("iOS " + UIDevice.current.systemVersion)
@@ -56,7 +58,7 @@ protocol ProvisionService {
     var result: FlutterResult { get }
     func searchDevices(prefix: String) -> Void
     func scanWifiNetworks(deviceName: String, proofOfPossession: String) -> Void
-    func provision(deviceName: String, proofOfPossession: String, ssid: String, passphrase: String, provToken: String, thingId: String, claimCert: String, claimKey: String) -> Void
+    func provision(deviceName: String, proofOfPossession: String, ssid: String, passphrase: String, provToken: String, thingId: String, claimCert: String, claimKey: String, rootCa: String) -> Void
 }
 
 private class BLEProvisionService: ProvisionService {
@@ -91,13 +93,14 @@ private class BLEProvisionService: ProvisionService {
         }
     }
 
-   func provision(deviceName: String, proofOfPossession: String, ssid: String, passphrase: String, provToken: String = "", thingId: String = "", claimCert: String = "", claimKey: String = "") {
+   func provision(deviceName: String, proofOfPossession: String, ssid: String, passphrase: String, provToken: String = "", thingId: String = "", claimCert: String = "", claimKey: String = "", rootCa: String = "") {
        self.connect(deviceName: deviceName, proofOfPossession: proofOfPossession) { device in
            let payloads: [(endpoint: String, value: String)] = [
                ("prov_token", provToken),
                ("thing_id", thingId),
                ("claim_cert", claimCert),
-               ("claim_key", claimKey)
+               ("claim_key", claimKey),
+               ("root_ca", rootCa)
            ].filter { !$0.value.isEmpty }
 
            func sendNext(index: Int) {
