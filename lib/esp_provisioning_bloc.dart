@@ -160,6 +160,7 @@ class EspProvisioningBloc
                 event.claim_cert,
                 event.claim_key,
                 event.ca_cert,
+                event.mqtt_url,
               )
               .timeout(
                 const Duration(seconds: TIMEOUT),

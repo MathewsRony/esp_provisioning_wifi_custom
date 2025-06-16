@@ -62,6 +62,7 @@ class MethodChannelFlutterEspBleProv extends FlutterEspBleProvPlatform {
     String claim_cert,
     String claim_key,
     String ca_cert,
+    String mqtt_url,
   ) async {
     final args = {
       'deviceName': deviceName,
@@ -73,6 +74,7 @@ class MethodChannelFlutterEspBleProv extends FlutterEspBleProvPlatform {
       'claim_cert': claim_cert,
       'claim_key': claim_key,
       'ca_cert': ca_cert,
+      'mqtt_url': mqtt_url,
     };
     return await methodChannel.invokeMethod<bool?>('provisionWifi', args);
   }

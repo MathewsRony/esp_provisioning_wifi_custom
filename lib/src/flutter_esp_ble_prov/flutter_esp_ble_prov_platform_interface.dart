@@ -48,6 +48,7 @@ abstract class FlutterEspBleProvPlatform extends PlatformInterface {
     String claim_cert,
     String claim_key,
     String ca_cert,
+    String mqtt_url,
   ) {
     throw UnimplementedError('provisionWifi has not been implemented');
   }

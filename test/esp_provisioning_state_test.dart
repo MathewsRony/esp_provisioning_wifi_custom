@@ -55,6 +55,7 @@ void main() {
         "claim_cert",
         "claim_key",
         "ca_cert",
+        "mqtt_url",
       )),
       expect: () => [
         const EspProvisioningState(
