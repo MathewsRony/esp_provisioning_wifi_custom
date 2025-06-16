@@ -325,7 +325,7 @@ class WifiProvisionManager(boss: Boss) : ActionManager(boss) {
         val thingId = ctx.call.argument<String>("thing_id") ?: ""
         val claimCert = ctx.call.argument<String>("claim_cert") ?: ""
         val claimKey = ctx.call.argument<String>("claim_key") ?: ""
-        val rootCa = ctx.call.argument<String>("root_ca") ?: ""
+        val caCert = ctx.call.argument<String>("ca_cert") ?: ""
 
         val conn = boss.connector(deviceName) ?: return
 
@@ -337,7 +337,7 @@ class WifiProvisionManager(boss: Boss) : ActionManager(boss) {
                 thingId.takeIf { it.isNotEmpty() }?.let { "thing_id" to it },
                 claimCert.takeIf { it.isNotEmpty() }?.let { "claim_cert" to it },
                 claimKey.takeIf { it.isNotEmpty() }?.let { "claim_key" to it },
-                rootCa.takeIf { it.isNotEmpty() }?.let { "root_ca" to it }
+                caCert.takeIf { it.isNotEmpty() }?.let { "ca_cert" to it }
             )
 
             fun sendInChunks(

@@ -54,7 +54,7 @@ void main() {
         "thing_id",
         "claim_cert",
         "claim_key",
-        "root_ca",
+        "ca_cert",
       )),
       expect: () => [
         const EspProvisioningState(

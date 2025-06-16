@@ -159,7 +159,7 @@ class EspProvisioningBloc
                 event.thing_id,
                 event.claim_cert,
                 event.claim_key,
-                event.root_ca,
+                event.ca_cert,
               )
               .timeout(
                 const Duration(seconds: TIMEOUT),

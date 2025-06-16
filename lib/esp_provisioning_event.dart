@@ -42,7 +42,7 @@ class EspProvisioningEventWifiSelected extends EspProvisioningEvent {
   final String thing_id;
   final String claim_cert;
   final String claim_key;
-  final String root_ca;
+  final String ca_cert;
 
   const EspProvisioningEventWifiSelected(
     this.bluetoothDevice,
@@ -53,7 +53,7 @@ class EspProvisioningEventWifiSelected extends EspProvisioningEvent {
     this.thing_id,
     this.claim_cert,
     this.claim_key,
-    this.root_ca,
+    this.ca_cert,
   );
 
   @override
@@ -66,6 +66,6 @@ class EspProvisioningEventWifiSelected extends EspProvisioningEvent {
     thing_id,
     claim_cert,
     claim_key,
-    root_ca,
+    ca_cert,
   ];
 }

@@ -184,7 +184,7 @@ class _MyAppViewState extends State<MyAppView> {
                                   "thing_id",
                                   "claim_cert",
                                   "claim_key",
-                                  "root_ca",
+                                  "ca_cert",
                                 ));
                             pushFeedback(
                                 'Provisioning WiFi $wifiNetwork on ${state.bluetoothDevice}');
