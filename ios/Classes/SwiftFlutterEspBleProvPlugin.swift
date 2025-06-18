@@ -1,3 +1,4 @@
+/// A description
 import Flutter
 import UIKit
 import ESPProvision
@@ -6,25 +7,26 @@ public class SwiftFlutterEspBleProvPlugin: NSObject, FlutterPlugin {
     private let SCAN_BLE_DEVICES = "scanBleDevices"
     private let SCAN_WIFI_NETWORKS = "scanWifiNetworks"
     private let PROVISION_WIFI = "provisionWifi"
-    
+
     public static func register(with registrar: FlutterPluginRegistrar) {
-        let channel = FlutterMethodChannel(name: "flutter_esp_ble_prov", binaryMessenger: registrar.messenger())
+        let channel = FlutterMethodChannel(
+            name: "flutter_esp_ble_prov", binaryMessenger: registrar.messenger())
         let instance = SwiftFlutterEspBleProvPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
-    
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let provisionService = BLEProvisionService(result: result);
         let arguments = call.arguments as! [String: Any]
-        
-        if(call.method == SCAN_BLE_DEVICES) {
+
+        if (call.method == SCAN_BLE_DEVICES) {
             let prefix = arguments["prefix"] as! String
             provisionService.searchDevices(prefix: prefix)
-        } else if(call.method == SCAN_WIFI_NETWORKS) {
+        } else if (call.method == SCAN_WIFI_NETWORKS) {
             let deviceName = arguments["deviceName"] as! String
             let proofOfPossession = arguments["proofOfPossession"] as! String
-            provisionService.scanWifiNetworks(deviceName: deviceName, proofOfPossession: proofOfPossession)
+            provisionService.scanWifiNetworks(
+                deviceName: deviceName, proofOfPossession: proofOfPossession)
         } else if (call.method == PROVISION_WIFI) {
             let deviceName = arguments["deviceName"] as! String
             let proofOfPossession = arguments["proofOfPossession"] as! String
@@ -50,7 +52,10 @@ protocol ProvisionService {
     var result: FlutterResult { get }
     func searchDevices(prefix: String) -> Void
     func scanWifiNetworks(deviceName: String, proofOfPossession: String) -> Void
-    func provision(deviceName: String, proofOfPossession: String, ssid: String, passphrase: String, customData: String) -> Void
+    func provision(
+        deviceName: String, proofOfPossession: String, ssid: String, passphrase: String,
+        customData: String
+    ) -> Void
 }
 
 private class BLEProvisionService: ProvisionService {
@@ -61,13 +66,16 @@ private class BLEProvisionService: ProvisionService {
     }
 
     func searchDevices(prefix: String) {
-        ESPProvisionManager.shared.searchESPDevices(devicePrefix: prefix, transport:.ble, security:.secure) { deviceList, error in
-            if(error != nil) {
+        ESPProvisionManager.shared.searchESPDevices(
+            devicePrefix: prefix, transport: .ble, security: .secure
+        ) { deviceList, error in
+            if (error != nil) {
                 ESPErrorHandler.handle(error: error!, result: self.result)
             }
-            self.result(deviceList?.map({ (device: ESPDevice) -> String in
-                return device.name
-            }))
+            self.result(
+                deviceList?.map({ (device: ESPDevice) -> String in
+                    return device.name
+                }))
         }
     }
 
@@ -75,18 +83,22 @@ private class BLEProvisionService: ProvisionService {
         self.connect(deviceName: deviceName, proofOfPossession: proofOfPossession) {
             device in
             device?.scanWifiList { wifiList, error in
-                if(error != nil) {
+                if (error != nil) {
                     NSLog("Error scanning wifi networks, deviceName: \(deviceName) ")
                     ESPErrorHandler.handle(error: error!, result: self.result)
                 }
-                self.result(wifiList?.map({(networks: ESPWifiNetwork) -> String in return networks.ssid}))
+                self.result(
+                    wifiList?.map({ (networks: ESPWifiNetwork) -> String in return networks.ssid }))
                 device?.disconnect()
             }
         }
     }
 
-    func provision(deviceName: String, proofOfPossession: String, ssid: String, passphrase: String, customData: String = "") {
-        self.connect(deviceName: deviceName, proofOfPossession: proofOfPossession){
+    func provision(
+        deviceName: String, proofOfPossession: String, ssid: String, passphrase: String,
+        customData: String = ""
+    ) {
+        self.connect(deviceName: deviceName, proofOfPossession: proofOfPossession) {
             device in
 
             // Send custom data if it's not empty
@@ -100,7 +112,9 @@ private class BLEProvisionService: ProvisionService {
                         if let error = error {
                             NSLog("Error sending custom data: \(error.localizedDescription)")
                         } else if let response = response {
-                            let responseString = String(data: response, encoding: .utf8) ?? "Unable to decode response"
+                            let responseString =
+                                String(data: response, encoding: .utf8)
+                                ?? "Unable to decode response"
                             NSLog("Custom data response: \(responseString)")
                         }
                     }
@@ -122,10 +136,16 @@ private class BLEProvisionService: ProvisionService {
         }
     }
 
-    private func connect(deviceName: String, proofOfPossession: String, completionHandler: @escaping (ESPDevice?) -> Void) {
-        ESPProvisionManager.shared.createESPDevice(deviceName: deviceName, transport: .ble, security: .secure, proofOfPossession: proofOfPossession) { espDevice, error in
+    private func connect(
+        deviceName: String, proofOfPossession: String,
+        completionHandler: @escaping (ESPDevice?) -> Void
+    ) {
+        ESPProvisionManager.shared.createESPDevice(
+            deviceName: deviceName, transport: .ble, security: .secure,
+            proofOfPossession: proofOfPossession
+        ) { espDevice, error in
 
-            if(error != nil) {
+            if (error != nil) {
                 ESPErrorHandler.handle(error: error!, result: self.result)
             }
             espDevice?.connect { status in
@@ -135,7 +155,8 @@ private class BLEProvisionService: ProvisionService {
                 case let .failedToConnect(error):
                     ESPErrorHandler.handle(error: error, result: self.result)
                 default:
-                    self.result(FlutterError(code: "DEVICE_DISCONNECTED", message: nil, details: nil))
+                    self.result(
+                        FlutterError(code: "DEVICE_DISCONNECTED", message: nil, details: nil))
                 }
             }
         }
@@ -147,4 +168,4 @@ private class ESPErrorHandler {
     static func handle(error: ESPError, result: FlutterResult) {
         result(FlutterError(code: String(error.code), message: error.description, details: nil))
     }
-}̉
+}
