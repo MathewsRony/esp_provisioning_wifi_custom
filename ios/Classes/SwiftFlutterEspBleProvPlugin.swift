@@ -31,7 +31,7 @@ public class SwiftFlutterEspBleProvPlugin: NSObject, FlutterPlugin {
             let pop = arguments["proofOfPossession"] as! String
             let ssid = arguments["ssid"] as! String
             let pass = arguments["passphrase"] as! String
-            let customData = arguments["custom-data"] as? String ?? ""
+            let customData = arguments["prov_token"] as! String
             provisionService.provision(deviceName: deviceName, proofOfPossession: pop, ssid: ssid, passphrase: pass, customData: customData)
         default:
             result("iOS " + UIDevice.current.systemVersion)
