@@ -90,6 +90,7 @@ private class BLEProvisionService: ProvisionService {
             }
 
             NSLog("Sending custom data before provisioning: \(customData)")
+            // Convert string to Data
             device.sendData(path: "custom-data", data: Data(customData.utf8)) { response, error in
                 if let error = error {
                     NSLog("Error receiving custom data response: \(error.localizedDescription)")
