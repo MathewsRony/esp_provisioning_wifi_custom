@@ -321,12 +321,12 @@ class WifiProvisionManager(boss: Boss) : ActionManager(boss) {
         val passphrase = ctx.arg("passphrase") ?: return
         val deviceName = ctx.arg("deviceName") ?: return
         val proofOfPossession = ctx.arg("proofOfPossession") ?: return
-        val provToken = ctx.call.argument<String>("prov_token") ?: ""
-        val thingId = ctx.call.argument<String>("thing_id") ?: ""
-        val claimCert = ctx.call.argument<String>("claim_cert") ?: ""
-        val claimKey = ctx.call.argument<String>("claim_key") ?: ""
-        val caCert = ctx.call.argument<String>("ca_cert") ?: ""
-        val mqtt_url = ctx.call.argument<String>("mqtt_url") ?: ""
+        val provToken = ctx.call.argument<String>("prov_token") ?: return
+        val thingId = ctx.call.argument<String>("thing_id") ?: return
+        val claimCert = ctx.call.argument<String>("claim_cert") ?: return
+        val claimKey = ctx.call.argument<String>("claim_key") ?: return
+        val caCert = ctx.call.argument<String>("ca_cert") ?: return
+        val mqtt_url = ctx.call.argument<String>("mqtt_url") ?: return
 
         val conn = boss.connector(deviceName) ?: return
 
