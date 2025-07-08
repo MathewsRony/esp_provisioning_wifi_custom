@@ -343,19 +343,25 @@ private class BLEProvisionService: ProvisionService {
                     NSLog("Failed to connect to device: \(deviceName)")
                     // The error parameter in the callback should provide more details.
                     // If ESPError is not available, construct a FlutterError.
-                    let connectError = ESPError(code: 101, description: "Failed to connect to BLE device") // Example error
+                    let connectError = NSError(domain: "com.yourapp.esp", code: 101, userInfo: [
+                        NSLocalizedDescriptionKey: "Failed to connect to BLE device"
+                    ]) // Example error
                     ESPErrorHandler.handle(error: connectError, result: self.result)
                     completionHandler(nil)
                 case .disconnected: // Handle if disconnect is a status during connection attempt
                     NSLog("Device \(deviceName) disconnected during connection attempt.")
-                    let disconnectError = ESPError(code: 102, description: "Device disconnected during connection attempt")
+                    let disconnectError = NSError(domain: "com.yourapp.esp", code: 102, userInfo: [
+                        NSLocalizedDescriptionKey: "Device disconnected during connection attempt"
+                    ])
                     ESPErrorHandler.handle(error: disconnectError, result: self.result)
                     completionHandler(nil)
                     // Add other relevant cases from ESPDeviceConnectionEvent or similar enum
                 default:
                     NSLog("Connection status for device \(deviceName): \(status)")
                     // Potentially an unexpected state
-                    let unknownError = ESPError(code: 103, description: "Unknown connection status: \(status)")
+                    let unknownError = NSError(domain: "com.yourapp.esp", code: 103, userInfo: [
+                        NSLocalizedDescriptionKey: "Unknown connection status: \(status)"
+                    ])
                     ESPErrorHandler.handle(error: unknownError, result: self.result)
                     completionHandler(nil)
                 }
