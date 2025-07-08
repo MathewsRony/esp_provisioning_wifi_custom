@@ -1,4 +1,4 @@
-
+swift
 import Flutter
 import UIKit
 import ESPProvision // Assuming this is your ESP provisioning library
@@ -80,6 +80,7 @@ public class SwiftFlutterEspBleProvPlugin: NSObject, FlutterPlugin {
             if !caCert.isEmpty { customDataList.append((path: "ca_cert", value: caCert)) }
             if !mqttUrl.isEmpty { customDataList.append((path: "mqtt_url", value: mqttUrl)) }
 
+
             provisionService.provision(
                 deviceName: deviceName,
                 proofOfPossession: pop,
@@ -127,7 +128,7 @@ private class BLEProvisionService: ProvisionService {
     func scanWifiNetworks(deviceName: String, proofOfPossession: String) {
         self.connect(deviceName: deviceName, proofOfPossession: proofOfPossession) { device in
             guard let espDevice = device else {
-                // Connection already handled error in connect or reported success
+                // Connection already handled error in `connect` or reported success
                 return
             }
             espDevice.scanWifiList { wifiList, error in
@@ -147,7 +148,7 @@ private class BLEProvisionService: ProvisionService {
     func provision(deviceName: String, proofOfPossession: String, ssid: String, passphrase: String, customDataList: [CustomDataTuple]) {
         self.connect(deviceName: deviceName, proofOfPossession: proofOfPossession) { device in
             guard let espDevice = device else {
-                // Connection failure already handled in connect
+                // Connection failure already handled in `connect`
                 return
             }
 
@@ -239,7 +240,7 @@ private class BLEProvisionService: ProvisionService {
             NSLog("Sending chunk for path '\(path)': offset \(offset), size \(chunk.count) bytes")
 
             // The ESPDevice.sendData method should handle the BLE write
-            // The path parameter in ESPDevice.sendData is the GATT characteristic endpoint
+            // The `path` parameter in ESPDevice.sendData is the GATT characteristic endpoint
             device.sendData(path: path, data: chunk) { responseData, error in
                 if let error = error {
                     NSLog("Error sending chunk for path '\(path)' at offset \(offset): \(error.localizedDescription)")
@@ -254,6 +255,7 @@ private class BLEProvisionService: ProvisionService {
                     NSLog("Response for chunk at path '\(path)', offset \(offset) was non-UTF8 data.")
                 }
 
+
                 offset += chunkSize
                 // Introduce a small delay if needed, especially if the peripheral requires time between writes
                 // DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { // e.g., 50ms delay
@@ -263,6 +265,7 @@ private class BLEProvisionService: ProvisionService {
         }
         sendNextChunk() // Start sending the first chunk
     }
+
 
     private func startWifiProvisioning(device: ESPDevice, ssid: String, passphrase: String) {
         NSLog("Starting WiFi provisioning with SSID: \(ssid)")
