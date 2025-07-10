@@ -47,7 +47,8 @@ public class SwiftFlutterEspBleProvPlugin: NSObject, FlutterPlugin {
             provisionService.searchDevices(prefix: prefix)
         case SCAN_WIFI_NETWORKS:
             guard let deviceName = arguments[ARG_DEVICE_NAME] as? String,
-                  let pop = arguments[ARG_POP] as? String else {
+                  let pop = arguments[ARG_POP] as? String
+            else {
                 result(FlutterError(code: "MISSING_ARGUMENT", message: "Missing 'deviceName' or 'proofOfPossession'", details: nil))
                 return
             }
@@ -56,7 +57,8 @@ public class SwiftFlutterEspBleProvPlugin: NSObject, FlutterPlugin {
             guard let deviceName = arguments[ARG_DEVICE_NAME] as? String,
                   let pop = arguments[ARG_POP] as? String,
                   let ssid = arguments[ARG_SSID] as? String,
-                  let passphrase = arguments[ARG_PASSPHRASE] as? String else {
+                  let passphrase = arguments[ARG_PASSPHRASE] as? String
+            else {
                 result(FlutterError(code: "MISSING_ARGUMENT", message: "Missing required arguments for provisioning", details: nil))
                 return
             }
@@ -72,12 +74,24 @@ public class SwiftFlutterEspBleProvPlugin: NSObject, FlutterPlugin {
 
             // Create a list of tuples (path, value) for data to send, filtering out empty values
             var customDataList: [CustomDataTuple] = []
-            if !provToken.isEmpty { customDataList.append((path: "prov_token", value: provToken)) }
-            if !thingId.isEmpty { customDataList.append((path: "thing_id", value: thingId)) }
-            if !claimCert.isEmpty { customDataList.append((path: "claim_cert", value: claimCert)) }
-            if !claimKey.isEmpty { customDataList.append((path: "claim_key", value: claimKey)) }
-            if !caCert.isEmpty { customDataList.append((path: "ca_cert", value: caCert)) }
-            if !mqttUrl.isEmpty { customDataList.append((path: "mqtt_url", value: mqttUrl)) }
+            if !provToken.isEmpty {
+                customDataList.append((path: "prov_token", value: provToken))
+            }
+            if !thingId.isEmpty {
+                customDataList.append((path: "thing_id", value: thingId))
+            }
+            if !claimCert.isEmpty {
+                customDataList.append((path: "claim_cert", value: claimCert))
+            }
+            if !claimKey.isEmpty {
+                customDataList.append((path: "claim_key", value: claimKey))
+            }
+            if !caCert.isEmpty {
+                customDataList.append((path: "ca_cert", value: caCert))
+            }
+            if !mqttUrl.isEmpty {
+                customDataList.append((path: "mqtt_url", value: mqttUrl))
+            }
 
 
             provisionService.provision(
@@ -119,7 +133,9 @@ private class BLEProvisionService: ProvisionService {
                 NSLog("Error searchDevices: \(error.localizedDescription)")
                 ESPErrorHandler.handle(error: error, result: self.result)
             } else {
-                self.result(deviceList?.map { $0.name })
+                self.result(deviceList?.map {
+                    $0.name
+                })
             }
         }
     }
@@ -135,7 +151,9 @@ private class BLEProvisionService: ProvisionService {
                     NSLog("Error scanning wifi networks, deviceName: \(deviceName), error: \(error.localizedDescription)")
                     ESPErrorHandler.handle(error: error, result: self.result)
                 } else {
-                    self.result(wifiList?.map { $0.ssid })
+                    self.result(wifiList?.map {
+                        $0.ssid
+                    })
                 }
                 // It's often good practice to disconnect after the operation is complete
                 // espDevice.disconnect() // Or manage connection lifecycle as needed
@@ -160,7 +178,8 @@ private class BLEProvisionService: ProvisionService {
                     device: espDevice,
                     dataList: customDataList,
                     currentIndex: 0
-                ) { allSentSuccessfully in // Completion for sending all custom data
+                ) { allSentSuccessfully in
+                    // Completion for sending all custom data
                     if allSentSuccessfully {
                         NSLog("All custom data sent successfully. Starting WiFi provisioning.")
                     } else {
@@ -234,7 +253,7 @@ private class BLEProvisionService: ProvisionService {
             }
 
             let chunkSize = min(mtu, dataLength - offset)
-            let chunk = data.subdata(in: offset ..< offset + chunkSize)
+            let chunk = data.subdata(in: offset..<offset + chunkSize)
 
             NSLog("Sending chunk for path '\(path)': offset \(offset), size \(chunk.count) bytes")
 
@@ -262,18 +281,15 @@ private class BLEProvisionService: ProvisionService {
                 // }
             }
         }
+
         sendNextChunk() // Start sending the first chunk
     }
 
 
     private func startWifiProvisioning(device: ESPDevice, ssid: String, passphrase: String) {
         NSLog("Starting WiFi provisioning with SSID: \(ssid)")
-        device.provision(ssid: ssid, passPhrase: passphrase) { status, error in // ESPProvision 2.x often includes error in the callback
-            if let error = error { // Handle potential error from the provision call itself
-                NSLog("Provisioning error: \(error.localizedDescription)")
-                ESPErrorHandler.handle(error: error, result: self.result) // Use your ESPError or a generic FlutterError
-                return
-            }
+        device.provision(ssid: ssid, passPhrase: passphrase) { status in
+            // ESPProvision 2.x often includes error in the callback
 
             // Handle status based on ESPProvision library version
             switch status {
@@ -301,13 +317,8 @@ private class BLEProvisionService: ProvisionService {
             transport: .ble,
             security: .secure, // Assuming security .secure, adjust if using .unsecure
             proofOfPossession: proofOfPossession
-        ) { espDevice, error in
-            if let error = error {
-                NSLog("Error creating ESPDevice \(deviceName): \(error.localizedDescription)")
-                ESPErrorHandler.handle(error: error, result: self.result)
-                completionHandler(nil)
-                return
-            }
+        ) { espDevice in
+
 
             guard let device = espDevice else {
                 NSLog("Failed to create ESPDevice instance for \(deviceName), espDevice is nil.")
@@ -316,13 +327,9 @@ private class BLEProvisionService: ProvisionService {
                 return
             }
 
-            device.connect { status, error in // ESPProvision 2.x often includes error in connect callback
-                if let error = error { // Handle error from the connect call itself
-                    NSLog("Connection error for device \(deviceName): \(error.localizedDescription)")
-                    ESPErrorHandler.handle(error: error, result: self.result)
-                    completionHandler(nil)
-                    return
-                }
+            device.connect { status, error in
+                // ESPProvision 2.x often includes error in connect callback
+              
 
                 // Handle status based on ESPProvision library version
                 switch status {
