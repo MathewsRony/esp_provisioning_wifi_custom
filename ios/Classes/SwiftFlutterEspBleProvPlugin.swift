@@ -175,10 +175,12 @@ private class BLEProvisionService: ProvisionService {
 
         NSLog("Enter provision")
         self.connect(deviceName: deviceName, proofOfPossession: proofOfPossession) { device in
+            NSLog("Enter provision !!!!!!1")
             guard let espDevice = device else {
                 // Connection failure already handled in `connect`
                 return
             }
+            NSLog("Enter provision !!!!!!2")
 
             if customDataList.isEmpty {
                 NSLog("No custom data to send. Starting WiFi provisioning directly.")
@@ -332,7 +334,7 @@ private class BLEProvisionService: ProvisionService {
             security: .secure,
             proofOfPossession: proofOfPossession
         ) { espDevice, error in
-            NSLog("Entering connect")
+            NSLog("Entering connect \(espDevice?.name ?? "Unknown Device")")
             if let error = error {
                 NSLog("Error creating ESPDevice \(deviceName): \(error.localizedDescription)")
                 ESPErrorHandler.handle(error: error, result: self.result)
