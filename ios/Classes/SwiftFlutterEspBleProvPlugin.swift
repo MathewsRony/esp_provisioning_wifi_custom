@@ -311,12 +311,12 @@ private class BLEProvisionService: ProvisionService {
     }
 
     private func connect(deviceName: String, proofOfPossession: String, completionHandler: @escaping (ESPDevice?) -> Void) {
-        NSLog("Attempting to connect to device: \(deviceName)")
+        let pop = proofOfPossession
         ESPProvisionManager.shared.createESPDevice(
             deviceName: deviceName,
             transport: .ble,
-            security: .secure, // Assuming security .secure, adjust if using .unsecure
-            proofOfPossession: proofOfPossession
+            security: .secure,
+            proofOfPossession: pop
         ) { espDevice, error in
             if let error = error {
                 NSLog("Error creating ESPDevice \(deviceName): \(error.localizedDescription)")
@@ -326,28 +326,27 @@ private class BLEProvisionService: ProvisionService {
             }
 
             guard let device = espDevice else {
-                NSLog("Failed to create ESPDevice instance for \(deviceName), espDevice is nil.")
-                self.result(FlutterError(code: "DEVICE_CREATION_FAILED", message: "ESPDevice instance is nil after creation.", details: nil))
+                self.result(FlutterError(code: "DEVICE_CREATION_FAILED", message: "ESPDevice is nil", details: nil))
                 completionHandler(nil)
                 return
             }
 
+            // ✅ Ensure PoP is set on the device *before* connecting:
+            device.proofOfPossession = pop
+
             device.connect { status in
                 switch status {
                 case .connected:
-                    NSLog("Successfully connected to device: \(deviceName)")
+                    NSLog("Connected: \(deviceName)")
                     completionHandler(device)
                 case .failedToConnect:
-                    NSLog("Failed to connect to device: \(deviceName)")
-                    self.result(FlutterError(code: "CONNECT_FAILED", message: "Failed to connect to BLE device", details: nil))
+                    self.result(FlutterError(code: "CONNECT_FAILED", message: "Failed to connect", details: nil))
                     completionHandler(nil)
                 case .disconnected:
-                    NSLog("Device \(deviceName) disconnected during connection attempt.")
-                    self.result(FlutterError(code: "DISCONNECTED", message: "Device disconnected during connection attempt", details: nil))
+                    self.result(FlutterError(code: "DISCONNECTED", message: "Disconnected prematurely", details: nil))
                     completionHandler(nil)
                 default:
-                    NSLog("Connection status for device \(deviceName): \(status)")
-                    self.result(FlutterError(code: "UNKNOWN_CONNECTION_STATUS", message: "Unknown connection status: \(status)", details: nil))
+                    self.result(FlutterError(code: "UNKNOWN_CONNECTION_STATUS", message: "\(status)", details: nil))
                     completionHandler(nil)
                 }
             }
