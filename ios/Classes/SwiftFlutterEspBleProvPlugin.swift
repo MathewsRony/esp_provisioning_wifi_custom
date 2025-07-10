@@ -317,8 +317,13 @@ private class BLEProvisionService: ProvisionService {
             transport: .ble,
             security: .secure, // Assuming security .secure, adjust if using .unsecure
             proofOfPossession: proofOfPossession
-        ) { espDevice in
-
+        ) { espDevice, error in
+            if let error = error {
+                NSLog("Error creating ESPDevice \(deviceName): \(error.localizedDescription)")
+                ESPErrorHandler.handle(error: error, result: self.result)
+                completionHandler(nil)
+                return
+            }
 
             guard let device = espDevice else {
                 NSLog("Failed to create ESPDevice instance for \(deviceName), espDevice is nil.")
@@ -327,9 +332,8 @@ private class BLEProvisionService: ProvisionService {
                 return
             }
 
-            device.connect { status, error in
+            device.connect { status in
                 // ESPProvision 2.x often includes error in connect callback
-              
 
                 // Handle status based on ESPProvision library version
                 switch status {
