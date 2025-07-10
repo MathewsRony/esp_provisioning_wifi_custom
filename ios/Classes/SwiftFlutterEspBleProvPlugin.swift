@@ -23,6 +23,7 @@ public class SwiftFlutterEspBleProvPlugin: NSObject, FlutterPlugin {
     private let ARG_MQTT_URL = "mqtt_url" // Corrected key from "mqtt_url "
 
     public static func register(with registrar: FlutterPluginRegistrar) {
+        NSLog("Enter register")
         let channel = FlutterMethodChannel(
             name: "flutter_esp_ble_prov", binaryMessenger: registrar.messenger())
         let instance = SwiftFlutterEspBleProvPlugin()
@@ -30,6 +31,7 @@ public class SwiftFlutterEspBleProvPlugin: NSObject, FlutterPlugin {
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        NSLog("Enter handle")
         // It's safer to cast arguments and handle potential nil values
         guard let arguments = call.arguments as? [String: Any] else {
             result(FlutterError(code: "INVALID_ARGUMENTS", message: "Arguments are not a dictionary", details: nil))
@@ -40,12 +42,14 @@ public class SwiftFlutterEspBleProvPlugin: NSObject, FlutterPlugin {
 
         switch call.method {
         case SCAN_BLE_DEVICES:
+            NSLog("Enter SCAN_BLE_DEVICES")
             guard let prefix = arguments["prefix"] as? String else {
                 result(FlutterError(code: "MISSING_ARGUMENT", message: "Missing 'prefix' argument", details: nil))
                 return
             }
             provisionService.searchDevices(prefix: prefix)
         case SCAN_WIFI_NETWORKS:
+            NSLog("Enter SCAN_WIFI_NETWORKS")
             guard let deviceName = arguments[ARG_DEVICE_NAME] as? String,
                   let pop = arguments[ARG_POP] as? String
             else {
@@ -54,11 +58,13 @@ public class SwiftFlutterEspBleProvPlugin: NSObject, FlutterPlugin {
             }
             provisionService.scanWifiNetworks(deviceName: deviceName, proofOfPossession: pop)
         case PROVISION_WIFI:
+            NSLog("Enter PROVISION_WIFI")
             guard let deviceName = arguments[ARG_DEVICE_NAME] as? String,
                   let pop = arguments[ARG_POP] as? String,
                   let ssid = arguments[ARG_SSID] as? String,
                   let passphrase = arguments[ARG_PASSPHRASE] as? String
             else {
+                NSLog("Enter else!!!!!!!!1")
                 result(FlutterError(code: "MISSING_ARGUMENT", message: "Missing required arguments for provisioning", details: nil))
                 return
             }
@@ -128,6 +134,7 @@ private class BLEProvisionService: ProvisionService {
     }
 
     func searchDevices(prefix: String) {
+        NSLog("Enter searchDevices")
         ESPProvisionManager.shared.searchESPDevices(devicePrefix: prefix, transport: .ble, security: .secure) { deviceList, error in
             if let error = error {
                 NSLog("Error searchDevices: \(error.localizedDescription)")
@@ -141,6 +148,7 @@ private class BLEProvisionService: ProvisionService {
     }
 
     func scanWifiNetworks(deviceName: String, proofOfPossession: String) {
+        NSLog("Enter scanWifiNetworks")
         self.connect(deviceName: deviceName, proofOfPossession: proofOfPossession) { device in
             guard let espDevice = device else {
                 // Connection already handled error in `connect` or reported success
@@ -163,6 +171,9 @@ private class BLEProvisionService: ProvisionService {
 
     // Updated provision method
     func provision(deviceName: String, proofOfPossession: String, ssid: String, passphrase: String, customDataList: [CustomDataTuple]) {
+
+
+        NSLog("Enter provision")
         self.connect(deviceName: deviceName, proofOfPossession: proofOfPossession) { device in
             guard let espDevice = device else {
                 // Connection failure already handled in `connect`
@@ -198,6 +209,7 @@ private class BLEProvisionService: ProvisionService {
         currentIndex: Int,
         completion: @escaping (Bool) -> Void // True if all successful, false otherwise
     ) {
+        NSLog("Entering sendCustomDataSequentially")
         if currentIndex >= dataList.count {
             NSLog("All custom data items processed.")
             completion(true) // Indicate all items were attempted
@@ -206,6 +218,7 @@ private class BLEProvisionService: ProvisionService {
 
         let currentItem = dataList[currentIndex]
         let endpointPath = currentItem.path
+        NSLog("Entering sendCustomDataSequentially!!!!!!!!")
         guard let dataToSend = currentItem.value.data(using: .utf8) else {
             NSLog("Error: Could not convert string to Data for path \(endpointPath)")
             // Continue with the next item, marking this one as a failure implicitly
@@ -244,8 +257,10 @@ private class BLEProvisionService: ProvisionService {
         let dataLength = data.count
         var offset = 0
 
+        NSLog("Enter sendDataInChunks")
         // Inner function to send the next chunk
         func sendNextChunk() {
+            NSLog("Entering sendDataInChunks")
             if offset >= dataLength {
                 NSLog("All chunks sent for path: \(path)")
                 completion(nil) // All done, no error
@@ -311,13 +326,13 @@ private class BLEProvisionService: ProvisionService {
     }
 
     private func connect(deviceName: String, proofOfPossession: String, completionHandler: @escaping (ESPDevice?) -> Void) {
-        let pop = proofOfPossession
         ESPProvisionManager.shared.createESPDevice(
             deviceName: deviceName,
             transport: .ble,
             security: .secure,
-            proofOfPossession: pop
+            proofOfPossession: proofOfPossession
         ) { espDevice, error in
+            NSLog("Entering connect")
             if let error = error {
                 NSLog("Error creating ESPDevice \(deviceName): \(error.localizedDescription)")
                 ESPErrorHandler.handle(error: error, result: self.result)
@@ -325,16 +340,8 @@ private class BLEProvisionService: ProvisionService {
                 return
             }
 
-            guard let device = espDevice else {
-                self.result(FlutterError(code: "DEVICE_CREATION_FAILED", message: "ESPDevice is nil", details: nil))
-                completionHandler(nil)
-                return
-            }
-
-            // ✅ Ensure PoP is set on the device *before* connecting:
-            device.proofOfPossession = pop
-
-            device.connect { status in
+            espDevice.connect { status in
+                NSLog("Entering connect status: \(status)")
                 switch status {
                 case .connected:
                     NSLog("Connected: \(deviceName)")
