@@ -340,12 +340,18 @@ private class BLEProvisionService: ProvisionService {
                 return
             }
 
-            espDevice.connect { status in
+            guard let device = espDevice else {
+                self.result(FlutterError(code: "DEVICE_CREATION_FAILED", message: "ESPDevice is nil", details: nil))
+                completionHandler(nil)
+                return
+            }
+
+            device.connect { status in
                 NSLog("Entering connect status: \(status)")
                 switch status {
                 case .connected:
                     NSLog("Connected: \(deviceName)")
-                    completionHandler(espDevice)
+                    completionHandler(device)
                 case .failedToConnect:
                     self.result(FlutterError(code: "CONNECT_FAILED", message: "Failed to connect", details: nil))
                     completionHandler(nil)
