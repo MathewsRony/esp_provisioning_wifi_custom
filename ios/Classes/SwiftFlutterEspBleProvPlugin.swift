@@ -333,31 +333,21 @@ private class BLEProvisionService: ProvisionService {
             }
 
             device.connect { status in
-                // ESPProvision 2.x often includes error in connect callback
-
-                // Handle status based on ESPProvision library version
                 switch status {
                 case .connected:
                     NSLog("Successfully connected to device: \(deviceName)")
                     completionHandler(device)
-                case .failedToConnect: // This case might be covered by the error parameter now
+                case .failedToConnect:
                     NSLog("Failed to connect to device: \(deviceName)")
-                    // The error parameter in the callback should provide more details.
-                    // If ESPError is not available, construct a FlutterError.
-                    let connectError = ESPError(code: 101, description: "Failed to connect to BLE device") // Example error
-                    ESPErrorHandler.handle(error: connectError, result: self.result)
+                    self.result(FlutterError(code: "CONNECT_FAILED", message: "Failed to connect to BLE device", details: nil))
                     completionHandler(nil)
-                case .disconnected: // Handle if disconnect is a status during connection attempt
+                case .disconnected:
                     NSLog("Device \(deviceName) disconnected during connection attempt.")
-                    let disconnectError = ESPError(code: 102, description: "Device disconnected during connection attempt")
-                    ESPErrorHandler.handle(error: disconnectError, result: self.result)
+                    self.result(FlutterError(code: "DISCONNECTED", message: "Device disconnected during connection attempt", details: nil))
                     completionHandler(nil)
-                    // Add other relevant cases from ESPDeviceConnectionEvent or similar enum
                 default:
                     NSLog("Connection status for device \(deviceName): \(status)")
-                    // Potentially an unexpected state
-                    let unknownError = ESPError(code: 103, description: "Unknown connection status: \(status)")
-                    ESPErrorHandler.handle(error: unknownError, result: self.result)
+                    self.result(FlutterError(code: "UNKNOWN_CONNECTION_STATUS", message: "Unknown connection status: \(status)", details: nil))
                     completionHandler(nil)
                 }
             }
