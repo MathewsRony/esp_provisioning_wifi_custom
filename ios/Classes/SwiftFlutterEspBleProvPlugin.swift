@@ -345,7 +345,7 @@ private class BLEProvisionService: ProvisionService {
                 switch status {
                 case .connected:
                     NSLog("Connected: \(deviceName)")
-                    completionHandler(device)
+                    completionHandler(espDevice)
                 case .failedToConnect:
                     self.result(FlutterError(code: "CONNECT_FAILED", message: "Failed to connect", details: nil))
                     completionHandler(nil)
