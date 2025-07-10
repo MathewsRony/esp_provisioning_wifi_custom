@@ -318,7 +318,12 @@ private class BLEProvisionService: ProvisionService {
             security: .secure, // Assuming security .secure, adjust if using .unsecure
             proofOfPossession: proofOfPossession
         ) { espDevice, error in
-
+            if let error = error {
+                NSLog("Error creating ESPDevice \(deviceName): \(error.localizedDescription)")
+                ESPErrorHandler.handle(error: error, result: self.result)
+                completionHandler(nil)
+                return
+            }
 
             guard let device = espDevice else {
                 NSLog("Failed to create ESPDevice instance for \(deviceName), espDevice is nil.")
